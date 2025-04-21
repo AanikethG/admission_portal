@@ -1,179 +1,268 @@
 <?php
-// backend/process_application.php
 
-// 1. Database Connection
-include 'db_connect.php';
 
-// 2. Server-Side Validation
-$errors = [];
+// process_application.php
 
-// Function to sanitize and validate input
-function validate_input($data)
+
+// 1. Database Connection (Replace with your actual credentials)
+$servername = "your_db_host";
+$username = "your_db_user";
+$password = "your_db_password";
+$dbname = "your_db_name";
+
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+	die("Connection failed: " . $conn->connect_error);
+}
+
+
+// 2. Get Program Type
+$program_type = $_POST['program_type'];
+
+
+// 3. Process Based on Program Type
+switch ($program_type) {
+	case 'Diploma':
+		processDiplomaApplication($conn);
+		break;
+	case 'Degree':
+		processDegreeApplication($conn);
+		break;
+	case 'ITILateral':
+		processITILateralApplication($conn);
+		break;
+	case 'MTech':
+		//  Leave empty for now.  MTech will be handled later
+		break;
+	default:
+		echo "Invalid program type.";
+}
+
+
+$conn->close();
+
+
+function processDiplomaApplication($conn)
 {
-	$data = trim($data);
-	$data = stripslashes($data);
-	$data = htmlspecialchars($data);
-	return $data;
-}
+	//  Get all the data from the form
+	$name = $_POST['name'];
+	$father_name = $_POST['father_name'];
+	$mother_name = $_POST['mother_name'];
+	$father_occupation = $_POST['father_occupation'];
+	$mother_occupation = $_POST['mother_occupation'];
+	$monthly_income = $_POST['monthly_income'];
+	$dob = $_POST['dob'];
+	$gender = $_POST['gender'];
+	$category = $_POST['category'];
+	$sub_category = $_POST['sub_category'];
+	$religion = $_POST['religion'];
+	$nationality = $_POST['nationality'];
+	$aadhaar_no = $_POST['aadhaar_no'];
+	$email = $_POST['email'];
+	$mobile = $_POST['mobile'];
+	$alt_mobile = $_POST['alt_mobile'];
+	$permanent_address = $_POST['permanent_address'];
+	$present_address = $_POST['present_address'];
+	$bpl = $_POST['bpl'];
+	$bank_account_no = $_POST['bank_account_no'];
+	$bank_name = $_POST['bank_name'];
+	$ifsc_code = $_POST['ifsc_code'];
+	$local_guardian_name = $_POST['local_guardian_name'];
+	$local_guardian_relationship = $_POST['local_guardian_relationship'];
+	$local_guardian_mobile = $_POST['local_guardian_mobile'];
+	$deeet_roll_no = $_POST['deeet_roll_no'];
+	$exam_passed_madhyamik = $_POST['exam_passed_madhyamik'];
+	$board_madhyamik = $_POST['board_madhyamik'];
+	$year_of_passing_madhyamik = $_POST['year_of_passing_madhyamik'];
+	$english_marks = $_POST['english_marks'];
+	$math_marks = $_POST['math_marks'];
+	$science_marks = $_POST['science_marks'];
+	$total_marks = $_POST['total_marks'];
+	$marks_obtained_total = $_POST['marks_obtained_total'];
+	$overall_percentage = $_POST['overall_percentage'];
 
-// Validate Name
-if (empty($_POST['name'])) {
-	$errors['name'] = "Name is required";
-} else {
-	$name = validate_input($_POST['name']);
-	if (!preg_match("/^[a-zA-Z ]*$/", $name)) {
-		$errors['name'] = "Only letters and white space allowed in Name";
-	}
-}
 
-// Validate Father's Name
-if (empty($_POST['father_name'])) {
-	$errors['father_name'] = "Father's Name is required";
-} else {
-	$father_name = validate_input($_POST['father_name']);
-	if (!preg_match("/^[a-zA-Z ]*$/", $father_name)) {
-		$errors['father_name'] = "Only letters and white space allowed in Father's Name";
-	}
-}
-
-// Validate Mother's Name
-if (empty($_POST['mother_name'])) {
-	$errors['mother_name'] = "Mother's Name is required";
-} else {
-	$mother_name = validate_input($_POST['mother_name']);
-	if (!preg_match("/^[a-zA-Z ]*$/", $mother_name)) {
-		$errors['mother_name'] = "Only letters and white space allowed in Mother's Name";
-	}
-}
-
-$father_occupation = validate_input($_POST['father_occupation']);
-$mother_occupation = validate_input($_POST['mother_occupation']);
-$monthly_income = validate_input($_POST['monthly_income']);
-
-// Validate DOB
-if (empty($_POST['dob'])) {
-	$errors['dob'] = "Date of Birth is required";
-} else {
-	$dob = validate_input($_POST['dob']);
-}
-
-// Validate Gender
-if (empty($_POST['gender'])) {
-	$errors['gender'] = "Gender is required";
-} else {
-	$gender = validate_input($_POST['gender']);
-}
-
-$category = validate_input($_POST['category']);
-$sub_category = validate_input($_POST['sub_category']);
-$religion = validate_input($_POST['religion']);
-$nationality = validate_input($_POST['nationality']);
-$aadhaar_no = validate_input($_POST['aadhaar_no']);
-
-// Validate Email
-if (empty($_POST['email'])) {
-	$errors['email'] = "Email is required";
-} else {
-	$email = validate_input($_POST['email']);
-	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-		$errors['email'] = "Invalid email format";
-	}
-}
-
-// Validate Mobile
-if (empty($_POST['mobile'])) {
-	$errors['mobile'] = "Mobile number is required";
-} else {
-	$mobile = validate_input($_POST['mobile']);
-	if (!preg_match("/^[0-9]{10}$/", $mobile)) {
-		$errors['mobile'] = "Invalid mobile number";
-	}
-}
-
-$alt_mobile = validate_input($_POST['alt_mobile']);
-
-// Validate Addresses
-if (empty($_POST['permanent_address'])) {
-	$errors['permanent_address'] = "Permanent Address is required";
-} else {
-	$permanent_address = validate_input($_POST['permanent_address']);
-}
-
-if (empty($_POST['present_address'])) {
-	$errors['present_address'] = "Present Address is required";
-} else {
-	$present_address = validate_input($_POST['present_address']);
-}
-
-$bpl = validate_input($_POST['bpl']);
-$bank_account_no = validate_input($_POST['bank_account_no']);
-$bank_name = validate_input($_POST['bank_name']);
-$ifsc_code = validate_input($_POST['ifsc_code']);
-$local_guardian_name = validate_input($_POST['local_guardian_name']);
-$local_guardian_relationship = validate_input($_POST['local_guardian_relationship']);
-$local_guardian_mobile = validate_input($_POST['local_guardian_mobile']);
-$deeet_roll_no = validate_input($_POST['deeet_roll_no']);
-$deeet_overall_merit = validate_input($_POST['deeet_overall_merit']);
-$deeet_category_merit = validate_input($_POST['deeet_category_merit']);
-$branch_allotted = validate_input($_POST['branch_allotted']);
-$aadhaar_card_no = validate_input($_POST['aadhaar_card_no']);
-$exam_passed = validate_input($_POST['exam_passed']);
-$board_university = validate_input($_POST['board_university']);
-$year_of_passing = validate_input($_POST['year_of_passing']);
-$main_subjects_english = validate_input($_POST['main_subjects_english']);
-$full_marks_english = validate_input($_POST['full_marks_english']);
-$marks_obtained_english = validate_input($_POST['marks_obtained_english']);
-$main_subjects_math = validate_input($_POST['main_subjects_math']);
-$full_marks_math = validate_input($_POST['full_marks_math']);
-$marks_obtained_math = validate_input($_POST['marks_obtained_math']);
-$main_subjects_science = validate_input($_POST['main_subjects_science']);
-$full_marks_science = validate_input($_POST['full_marks_science']);
-$marks_obtained_science = validate_input($_POST['marks_obtained_science']);
-$total_marks = validate_input($_POST['total_marks']);
-$marks_obtained_total = validate_input($_POST['marks_obtained_total']);
-$overall_percentage = validate_input($_POST['overall_percentage']);
-$local_guardian = validate_input($_POST['local_guardian']);
-$local_guardian_relationship = validate_input($_POST['local_guardian_relationship']);
-$local_guardian_mobile = validate_input($_POST['local_guardian_mobile']);
-
-// 3.  Insert Data into Database
-if (empty($errors)) {
+	//  SQL to insert data (Replace 'diploma_applications' with your table name)
 	$sql = "INSERT INTO diploma_applications (
-                program_type, name, father_name, mother_name, father_occupation, mother_occupation, monthly_income,
-                dob, gender, category, sub_category, religion, nationality, aadhaar_no, email, mobile, alt_mobile,
-                permanent_address, present_address, bpl, bank_account_no, bank_name, ifsc_code, local_guardian_name,
-                local_guardian_relationship, local_guardian_mobile, deeet_roll_no, deeet_overall_merit, deeet_category_merit,
-                branch_allotted, aadhaar_card_no, exam_passed, board_university, year_of_passing, main_subjects_english,
-                full_marks_english, marks_obtained_english, main_subjects_math, full_marks_math, marks_obtained_math,
-                main_subjects_science, full_marks_science, marks_obtained_science, total_marks, marks_obtained_total,
-                overall_percentage, local_guardian, local_guardian_relationship, local_guardian_mobile
-            ) VALUES (
-                'Diploma', '$name', '$father_name', '$mother_name', '$father_occupation', '$mother_occupation', '$monthly_income',
-                '$dob', '$gender', '$category', '$sub_category', '$religion', '$nationality', '$aadhaar_no', '$email', '$mobile', '$alt_mobile',
-                '$permanent_address', '$present_address', '$bpl', '$bank_account_no', '$bank_name', '$ifsc_code', '$local_guardian_name',
-                '$local_guardian_relationship', '$local_guardian_mobile', '$deeet_roll_no', '$deeet_overall_merit', '$deeet_category_merit',
-                '$branch_allotted', '$aadhaar_card_no', '$exam_passed', '$board_university', '$year_of_passing', '$main_subjects_english',
-                '$full_marks_english', '$marks_obtained_english', '$main_subjects_math', '$full_marks_math', '$marks_obtained_math',
-                '$main_subjects_science', '$full_marks_science', '$marks_obtained_science', '$total_marks', '$marks_obtained_total',
-                '$overall_percentage', '$local_guardian', '$local_guardian_relationship', '$local_guardian_mobile'
-            )";
+  name, father_name, mother_name, father_occupation, mother_occupation, monthly_income,
+  dob, gender, category, sub_category, religion, nationality, aadhaar_no, email, mobile,
+  alt_mobile, permanent_address, present_address, bpl, bank_account_no, bank_name,
+  ifsc_code, local_guardian_name, local_guardian_relationship, local_guardian_mobile,
+  deeet_roll_no, exam_passed_madhyamik, board_madhyamik, year_of_passing_madhyamik,
+  english_marks, math_marks, science_marks, total_marks, marks_obtained_total,
+  overall_percentage
+  ) VALUES (
+  '$name', '$father_name', '$mother_name', '$father_occupation', '$mother_occupation', '$monthly_income',
+  '$dob', '$gender', '$category', '$sub_category', '$religion', '$nationality', '$aadhaar_no', '$email', '$mobile',
+  '$alt_mobile', '$permanent_address', '$present_address', '$bpl', '$bank_account_no', '$bank_name',
+  '$ifsc_code', '$local_guardian_name', '$local_guardian_relationship', '$local_guardian_mobile',
+  '$deeet_roll_no', '$exam_passed_madhyamik', '$board_madhyamik', '$year_of_passing_madhyamik',
+  '$english_marks', '$math_marks', '$science_marks', '$total_marks', '$marks_obtained_total',
+  '$overall_percentage'
+  )";
+
 
 	if ($conn->query($sql) === TRUE) {
-		echo "Application submitted successfully";
-		// Redirect to success page or print preview
-		// header("Location: application_success.php");
-		// exit();
+		echo "Diploma application submitted successfully";
+		//  You might want to redirect to a confirmation page
 	} else {
 		echo "Error: " . $sql . "<br>" . $conn->error;
 	}
-} else {
-	// Display Errors (for development only)
-	echo "<h3>Errors:</h3>";
-	echo "<ul>";
-	foreach ($errors as $key => $value) {
-		echo "<li>$value</li>";
-	}
-	echo "</ul>";
 }
 
-$conn->close();
+
+function processDegreeApplication($conn)
+{
+	//  Get all the data from the form
+	$name = $_POST['name'];
+	$father_name = $_POST['father_name'];
+	$mother_name = $_POST['mother_name'];
+	$father_occupation = $_POST['father_occupation'];
+	$mother_occupation = $_POST['mother_occupation'];
+	$monthly_income = $_POST['monthly_income'];
+	$dob = $_POST['dob'];
+	$gender = $_POST['gender'];
+	$category = $_POST['category'];
+	$sub_category = $_POST['sub_category'];
+	$religion = $_POST['religion'];
+	$nationality = $_POST['nationality'];
+	$aadhaar_no = $_POST['aadhaar_no'];
+	$email = $_POST['email'];
+	$mobile = $_POST['mobile'];
+	$alt_mobile = $_POST['alt_mobile'];
+	$permanent_address = $_POST['permanent_address'];
+	$present_address = $_POST['present_address'];
+	$bpl = $_POST['bpl'];
+	$bank_account_no = $_POST['bank_account_no'];
+	$bank_name = $_POST['bank_name'];
+	$ifsc_code = $_POST['ifsc_code'];
+	$local_guardian_name = $_POST['local_guardian_name'];
+	$local_guardian_relationship = $_POST['local_guardian_relationship'];
+	$local_guardian_mobile = $_POST['local_guardian_mobile'];
+	$tbjee_roll_no = $_POST['tbjee_roll_no'];
+	$exam_passed_madhyamik = $_POST['exam_passed_madhyamik'];
+	$board_madhyamik = $_POST['board_madhyamik'];
+	$year_of_passing_madhyamik = $_POST['year_of_passing_madhyamik'];
+	$exam_passed_hs = $_POST['exam_passed_hs'];
+	$board_hs = $_POST['board_hs'];
+	$year_of_passing_hs = $_POST['year_of_passing_hs'];
+	$main_subjects_physics = $_POST['main_subjects_physics'];
+	$full_marks_physics = $_POST['full_marks_physics'];
+	$marks_obtained_physics = $_POST['marks_obtained_physics'];
+	$main_subjects_chemistry = $_POST['main_subjects_chemistry'];
+	$full_marks_chemistry = $_POST['full_marks_chemistry'];
+	$marks_obtained_chemistry = $_POST['marks_obtained_chemistry'];
+	$main_subjects_math = $_POST['main_subjects_math'];
+	$full_marks_math = $_POST['full_marks_math'];
+	$marks_obtained_math = $_POST['marks_obtained_math'];
+	$total_marks = $_POST['total_marks'];
+	$marks_obtained_total = $_POST['marks_obtained_total'];
+	$overall_percentage = $_POST['overall_percentage'];
+
+
+	//  SQL to insert data (Replace 'degree_applications' with your table name)
+	$sql = "INSERT INTO degree_applications (
+  name, father_name, mother_name, father_occupation, mother_occupation, monthly_income,
+  dob, gender, category, sub_category, religion, nationality, aadhaar_no, email, mobile,
+  alt_mobile, permanent_address, present_address, bpl, bank_account_no, bank_name,
+  ifsc_code, local_guardian_name, local_guardian_relationship, local_guardian_mobile,
+  tbjee_roll_no, exam_passed_madhyamik, board_madhyamik, year_of_passing_madhyamik,
+  exam_passed_hs, board_hs, year_of_passing_hs,
+  main_subjects_physics, full_marks_physics, marks_obtained_physics,
+  main_subjects_chemistry, full_marks_chemistry, marks_obtained_chemistry,
+  main_subjects_math, full_marks_math, marks_obtained_math,
+  total_marks, marks_obtained_total, overall_percentage
+  ) VALUES (
+  '$name', '$father_name', '$mother_name', '$father_occupation', '$mother_occupation', '$monthly_income',
+  '$dob', '$gender', '$category', '$sub_category', '$religion', '$nationality', '$aadhaar_no', '$email', '$mobile',
+  '$alt_mobile', '$permanent_address', '$present_address', '$bpl', '$bank_account_no', '$bank_name',
+  '$ifsc_code', '$local_guardian_name', '$local_guardian_relationship', '$local_guardian_mobile',
+  '$tbjee_roll_no', '$exam_passed_madhyamik', '$board_madhyamik', '$year_of_passing_madhyamik',
+  '$exam_passed_hs', '$board_hs', '$year_of_passing_hs',
+  '$main_subjects_physics', '$full_marks_physics', '$marks_obtained_physics',
+  '$main_subjects_chemistry', '$full_marks_chemistry', '$marks_obtained_chemistry',
+  '$main_subjects_math', '$full_marks_math', '$marks_obtained_math',
+  '$total_marks', '$marks_obtained_total', '$overall_percentage'
+  )";
+
+
+	if ($conn->query($sql) === TRUE) {
+		echo "Degree application submitted successfully";
+		//  You might want to redirect to a confirmation page
+	} else {
+		echo "Error: " . $sql . "<br>" . $conn->error;
+	}
+}
+
+
+function processITILateralApplication($conn)
+{
+	//  Get all the data from the form
+	$name = $_POST['name'];
+	$father_name = $_POST['father_name'];
+	$mother_name = $_POST['mother_name'];
+	$father_occupation = $_POST['father_occupation'];
+	$mother_occupation = $_POST['mother_occupation'];
+	$monthly_income = $_POST['monthly_income'];
+	$dob = $_POST['dob'];
+	$gender = $_POST['gender'];
+	$category = $_POST['category'];
+	$sub_category = $_POST['sub_category'];
+	$religion = $_POST['religion'];
+	$nationality = $_POST['nationality'];
+	$aadhaar_no = $_POST['aadhaar_no'];
+	$email = $_POST['email'];
+	$mobile = $_POST['mobile'];
+	$alt_mobile = $_POST['alt_mobile'];
+	$permanent_address = $_POST['permanent_address'];
+	$present_address = $_POST['present_address'];
+	$bpl = $_POST['bpl'];
+	$bank_account_no = $_POST['bank_account_no'];
+	$bank_name = $_POST['bank_name'];
+	$ifsc_code = $_POST['ifsc_code'];
+	$local_guardian_name = $_POST['local_guardian_name'];
+	$local_guardian_relationship = $_POST['local_guardian_relationship'];
+	$local_guardian_mobile = $_POST['local_guardian_mobile'];
+	$itilee_roll_no = $_POST['itilee_roll_no'];
+	$exam_passed_madhyamik = $_POST['exam_passed_madhyamik'];
+	$board_university_madhyamik = $_POST['board_university_madhyamik'];
+	$year_of_passing_madhyamik = $_POST['year_of_passing_madhyamik'];
+	$exam_passed_iti = $_POST['exam_passed_iti'];
+	$board_university_iti = $_POST['board_university_iti'];
+	$year_of_passing_iti = $_POST['year_of_passing_iti'];
+	$full_marks_iti = $_POST['full_marks_iti'];
+	$marks_obtained_iti = $_POST['marks_obtained_iti'];
+	$overall_percentage_iti = $_POST['overall_percentage_iti'];
+
+
+	//  SQL to insert data (Replace 'iti_lateral_applications' with your table name)
+	$sql = "INSERT INTO iti_lateral_applications (
+  name, father_name, mother_name, father_occupation, mother_occupation, monthly_income,
+  dob, gender, category, sub_category, religion, nationality, aadhaar_no, email, mobile,
+  alt_mobile, permanent_address, present_address, bpl, bank_account_no, bank_name,
+  ifsc_code, local_guardian_name, local_guardian_relationship, local_guardian_mobile,
+  itilee_roll_no, exam_passed_madhyamik, board_university_madhyamik, year_of_passing_madhyamik,
+  exam_passed_iti, board_university_iti, year_of_passing_iti,
+  full_marks_iti, marks_obtained_iti, overall_percentage_iti
+  ) VALUES (
+  '$name', '$father_name', '$mother_name', '$father_occupation', '$mother_occupation', '$monthly_income',
+  '$dob', '$gender', '$category', '$sub_category', '$religion', '$nationality', '$aadhaar_no', '$email', '$mobile',
+  '$alt_mobile', '$permanent_address', '$present_address', '$bpl', '$bank_account_no', '$bank_name',
+  '$ifsc_code', '$local_guardian_name', '$local_guardian_relationship', '$local_guardian_mobile',
+  '$itilee_roll_no', '$exam_passed_madhyamik', '$board_university_madhyamik', '$year_of_passing_madhyamik',
+  '$exam_passed_iti', '$board_university_iti', '$year_of_passing_iti',
+  '$full_marks_iti', '$marks_obtained_iti', '$overall_percentage_iti'
+  )";
+
+
+	if ($conn->query($sql) === TRUE) {
+		echo "ITI Lateral Entry application submitted successfully";
+		//  You might want to redirect to a confirmation page
+	} else {
+		echo "Error: " . $sql . "<br>" . $conn->error;
+	}
+}
+
+
+//  4. MTech Functionality (To be added later)
